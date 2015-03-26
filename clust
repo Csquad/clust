@@ -10,33 +10,31 @@ needtodo(){
 
 
 exp(){
-  if [ -d "${savepath}" ]; 
-  then
-    for p in "${afile}";
-    do
-     # echo "Premier dirname ${p}" && echo "Second ${p%%.*}";
-      if [ ! -d "${savepath}/${p}" ];
-      then
-        p2=dirname "${p}"
-        echo "creation du chemin ${savepath}/${p2}"
-        mkdir -p "${savepath}/${p2}";
-      fi;
-      echo "copie de ${p} vers ${savepath}/${p}"
-      cp -p -u "${p}" "${savepath}/${p} ";
-    done;
-    #for d in "${adir}";
-    #do
-     # if [ -d "${d}" ];
-      #then
-       # mkdir -p "${d}" "${savepath}/${d}/"
-      #else
-      #  echo "Directory not exit."
-      #fi;
-    #done
-  else
-    echo "creation de ${savepath}"
-    mkdir "${savepath}";
+  if [ ! -d "${savepath}" ]; then
+	echo "creation de ${savepath}";
+	mkdir "${savepath}";
   fi;
+
+ for p in ${afile[*]}; do
+	if [ ! -d "${savepath}/${p}" ]; then
+		p2=(`echo $p | egrep -o '.*/'`);
+		echo "creation du chemin ${savepath}$p2";
+		mkdir -p "${savepath}/$p2";
+	fi;
+
+	echo "copie de $p vers ${savepath}$p";
+	cp -p -u "$p" "${savepath}$p";
+ done;
+
+  for p in ${adir[*]}; do
+	if [ ! -d "${savepath}/${p}" ]; then
+		echo "creation du chemin ${savepath}$p";
+		mkdir -p "${savepath}/$p";
+	fi;
+
+  	echo "copie de $p/* vers ${savepath}$p/";
+	cp -p -u -r "$p"/* "${savepath}$p/";
+  done;
 }
 
 imp(){
