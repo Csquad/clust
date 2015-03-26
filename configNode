@@ -1,0 +1,60 @@
+#!/bin/bash -x
+
+master="192.168.1.1"
+node="node";
+j="0";
+
+config(){
+
+ip neigh flush all;
+for (( i=1; i<=255; i++ ))
+do
+  ping -c 1 192.168.1."$i" > /dev/null 2>&1 &
+done
+x2200=(`arp -n | egrep '00:1b:24|00:16:36' | egrep -o '192\.168\.1\.[0-9]*'`)
+v20z=(`arp -n | egrep '00:09:3d' | egrep -o '192\.168\.1\.[0-9]*' | egrep -v '192.168.1.1$'`)
+all=(${x2200[*]} ${v20z[*]})
+
+echo "X2200 running: ${#x2200[*]}";
+echo "v20z running: ${#v20z[*]}";
+echo "total running: ${#all[*]}";
+
+for i in {00.."${#v20z[*]}"..1};
+do
+  newhostname="${node}${i}"
+  echo "$tab[j] $newhostname">>/etc/host ;
+  ssh -o StrictHostKeyChecking=no -t root@tab[j] bash -c"'
+   echo"$newhostname">/etc/hostname;
+   echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/etc/skel/.bashrc
+   echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/etc/skel/.bashrc
+
+   echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/root/.bashrc
+   echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/root/.bashrc
+
+   yum install nfs-utils;
+   echo "${master}:/usr/local /usr/local nfs rw,hard,intr 0 0">>/etc/fstab;
+   echo "${master}:/home /home nfs rw,sync,hard,intr 0 0">>/etc/fstab;
+   yum install libgomp openmpi openmpi-devel;
+  '"
+done
+for i in {"${#v20z[*]}".."${#x2200[*]}"..1};
+do
+  newhostname="${node}${i}"
+  /etc/hosts>>"$tab[j] $newhostname";
+  ssh -o StrictHostKeyChecking=no -t root@tab[j] bash -c"'
+    echo"$newhostname">/etc/hostname;
+    echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/etc/skel/.bashrc
+    echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/etc/skel/.bashrc
+
+    echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/root/.bashrc
+    echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/root/.bashrc
+
+    yum install nfs-utils;
+    echo "${master}:/usr/local /usr/local nfs rw,hard,intr 0 0">>/etc/fstab;
+    echo "${master}:/home /home nfs rw,sync,hard,intr 0 0">>/etc/fstab;
+    yum install libgomp openmpi openmpi-devel;
+  "
+done
+}
+
+config() $@;
