@@ -1,0 +1,92 @@
+#!/bin/bash 
+source ./clust.conf
+
+needtodo(){
+ for com in  "${1}";
+ do
+   com;
+ done;
+}
+
+
+exp(){
+  if [ -d "${savepath}" ]; 
+  then
+    for p in "${afile}";
+    do
+     # echo "Premier dirname ${p}" && echo "Second ${p%%.*}";
+      if [ ! -d "${savepath}/${p}" ];
+      then
+        p2=dirname "${p}"
+        echo "creation du chemin ${savepath}/${p2}"
+        mkdir -p "${savepath}/${p2}";
+      fi;
+      echo "copie de ${p} vers ${savepath}/${p}"
+      cp -p -u "${p}" "${savepath}/${p} ";
+    done;
+    #for d in "${adir}";
+    #do
+     # if [ -d "${d}" ];
+      #then
+       # mkdir -p "${d}" "${savepath}/${d}/"
+      #else
+      #  echo "Directory not exit."
+      #fi;
+    #done
+  else
+    echo "creation de ${savepath}"
+    mkdir "${savepath}";
+  fi;
+}
+
+imp(){
+  for i in tdir;
+  do
+    cp -r -p  "${savepath}/${i}" "${i}"
+  done;
+  for path in "$tfile";
+  do
+   cat  "${savepath}/${path}" > "${path}"; 
+  done;
+  needtodo "${prescservice}";
+  for service in "${services}";
+  do
+    systemctl enable "${service}" && systemctl start "${service}"
+  done;
+  needtodo "${postscservice}"
+}
+
+inst(){
+  #yum install -y "${packages}";
+  echo "installation";
+}
+
+
+usage(){
+ echo "Usage : clust OPTION"
+ echo "The file clust.conf should be edit before for configure conf file export/import, needed daemon packages. "
+ echo "Options : "
+ echo " --export -exp export : export conf files specified in clust.conf."
+ echo " --import -imp import : import conf files and launch specified daemon."
+ echo " --install -inst install : install specified packages."
+ exit 2;
+}
+
+main(){
+  case "$1" in 
+    "-imp" | "--import" | "import")
+      imp;
+    ;;
+    "-exp" | "--export" | "export")
+      exp;
+    ;;
+    "-inst" | "--install" | "install")
+      inst;
+    ;;
+    *)
+      usage;
+    ;;
+  esac;
+}
+
+main $@;
