@@ -21,9 +21,9 @@ echo "total running: ${#all[*]}";
 
 for i in {00.."${#v20z[*]}"..1};
 do
-  newhostname="${node}${i}"
-  echo "$tab[j] $newhostname">>/etc/host ;
-  ssh -o StrictHostKeyChecking=no -t root@tab[j] bash -c"'
+  newhostname="${node}${j}"
+  echo "$all[j] $newhostname">>/etc/host ;
+  ssh -o StrictHostKeyChecking=no -t root@$all[j] bash -c"'
    echo"$newhostname">/etc/hostname;
    echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/etc/skel/.bashrc
    echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/etc/skel/.bashrc
@@ -34,14 +34,16 @@ do
    yum install nfs-utils;
    echo "${master}:/usr/local /usr/local nfs rw,hard,intr 0 0">>/etc/fstab;
    echo "${master}:/home /home nfs rw,sync,hard,intr 0 0">>/etc/fstab;
-   yum install libgomp openmpi openmpi-devel;
+   yum install libgomp openmpi openmpi-devel -y;
   '"
+  let j++;
 done
+
 for i in {"${#v20z[*]}".."${#x2200[*]}"..1};
 do
-  newhostname="${node}${i}"
-  /etc/hosts>>"$tab[j] $newhostname";
-  ssh -o StrictHostKeyChecking=no -t root@tab[j] bash -c"'
+  newhostname="${node}${j}"
+  echo "$all[j] $newhostname">>/etc/host;
+  ssh -o StrictHostKeyChecking=no -t root@all[j] bash -c"'
     echo"$newhostname">/etc/hostname;
     echo"export LD_LIBRARY_PATH=\"/usr/lib64/openmpi/lib:\"\$LD_LIBRARY_PATH">>/etc/skel/.bashrc
     echo"export PATH=\$PATH:\"/usr/lib64/openmpi/bin/\"">>/etc/skel/.bashrc
@@ -52,8 +54,9 @@ do
     yum install nfs-utils;
     echo "${master}:/usr/local /usr/local nfs rw,hard,intr 0 0">>/etc/fstab;
     echo "${master}:/home /home nfs rw,sync,hard,intr 0 0">>/etc/fstab;
-    yum install libgomp openmpi openmpi-devel;
+    yum install libgomp openmpi openmpi-devel -y;
   "
+  let j++
 done
 }
 
